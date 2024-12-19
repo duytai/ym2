@@ -5,13 +5,12 @@ from copy import deepcopy
 from .parser import OverrideParser
 
 class Sweeper:
-    def __init__(self, conf: DictConfig, dotlist: List[int]):
+    def __init__(self, conf: DictConfig):
         parser = OverrideParser(conf)
         overrides = parser.parse_overrides()
 
         self.conf = conf
         self.overrides = overrides
-        self.dotlist = dotlist
 
     def sweep(self) -> List[Tuple]:
         if not self.overrides:

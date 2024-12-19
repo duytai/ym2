@@ -17,17 +17,19 @@ class Stat:
     total: int
     config: Dict
     override: str
+    term: str
     status: str
     started: int
     duration: int
     pid: int
 
 class Worker:
-    def __init__(self, conf: Dict, override: str, curr: int, total: int):
+    def __init__(self, conf: Dict, override: str, curr: int, total: int, term: str):
         self.curr = curr
         self.total = total
         self.conf = conf
         self.override = override
+        self.term = term
         self.pid = os.getpid()
         self.seek_pos = None
         self.has_error = False
@@ -50,6 +52,7 @@ class Worker:
                 total=self.total,
                 config=self.conf,
                 override=self.override,
+                term=self.term,
                 status='running',
                 started=int(time.time()),
                 duration=0,
@@ -78,12 +81,13 @@ class Worker:
             file.write(json.dumps(asdict(self.stat)) + '\n')
 
 class Launcher:
-    def __init__(self, cls: Callable, confs: List[Tuple]):
+    def __init__(self, cls: Callable, confs: List[Tuple], term: str):
         self.cls = cls
         self.confs = confs
+        self.term = term
 
     def worker(self, conf: Dict, override: str, curr: int, total: int):
-        w = Worker(conf, override, curr, total)
+        w = Worker(conf, override, curr, total, self.term)
         w.setup()
         w.run(self.cls)
         w.teardown()

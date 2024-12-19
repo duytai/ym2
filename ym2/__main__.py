@@ -7,15 +7,15 @@ from .launcher import Launcher
 def main():
     parser = ConfigParser()
     conf = parser.parse()
-    dotlist = parser.parse_cli(return_dotlist=True)
 
-    sweeper = Sweeper(conf, dotlist)
+    sweeper = Sweeper(conf)
     confs = sweeper.sweep()
 
     importer = ClassImporter(conf.get('_cls_', None))
     cls = importer.import_class()
 
-    launcher = Launcher(cls, confs)
+    dotlist = parser.parse_cli(return_dotlist=True)
+    launcher = Launcher(cls, confs, ','.join(dotlist))
     launcher.launch()
 
 
