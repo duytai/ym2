@@ -37,8 +37,12 @@ class OverrideParser:
 
 class ConfigParser:
     def __init__(self):
-        parser = argparse.ArgumentParser('ym2')
+        parser = argparse.ArgumentParser(
+            prog='ym2',
+            description='A framework to configure complex AI/ML projects'
+        )
         parser.add_argument('config_file', type=str, help='config file')
+        parser.add_argument('--version', action='version', version='%(prog)s 0.0.7')
         args, cli_args = parser.parse_known_args()
 
         self.yaml_file = args.config_file

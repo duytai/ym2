@@ -1,6 +1,6 @@
 [project]
 name = "ym2"
-version = "0.0.2"
+version = "0.0.7"
 dependencies = [
     "pyyaml",
     "omegaconf",
@@ -12,4 +12,4 @@ requires = ["setuptools", "wheel"]
 packages = ["ym2"]
 
 [project.scripts]
-ym2="ym2:parse"
+ym2="ym2.__main__:main"
