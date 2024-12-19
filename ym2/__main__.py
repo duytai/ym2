@@ -1,7 +1,7 @@
 from omegaconf import OmegaConf
 from .parser import ConfigParser 
 from .sweeper import Sweeper
-from .importer import ClassImporter
+from .importer import import_class
 from .launcher import Launcher
 
 def main():
@@ -11,8 +11,7 @@ def main():
     sweeper = Sweeper(conf)
     confs = sweeper.sweep()
 
-    importer = ClassImporter(conf.get('_cls_', None))
-    cls = importer.import_class()
+    cls = import_class(conf.get('_cls_', None))
 
     dotlist = parser.parse_cli(return_dotlist=True)
     launcher = Launcher(cls, confs, ','.join(dotlist))
