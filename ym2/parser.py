@@ -1,6 +1,6 @@
 from omegaconf import OmegaConf, DictConfig, ListConfig
 from pathlib import Path
-from typing import List, Any, Union
+from typing import List, Any, Union, Optional, Dict
 import yaml
 import argparse
 import re
@@ -63,31 +63,28 @@ class ConfigParser:
             return dotlist
         return OmegaConf.from_dotlist(dotlist)
 
+    @staticmethod
+    def _find_dependency(yaml_dir: Path, k: str, v: Any) -> Optional[Dict]:
+        if not isinstance(v, str):
+            return None
+        file = yaml_dir / k / f'{v}.yaml'
+        if not file.exists():
+            file = yaml_dir / f'{v}.yaml'
+        if not file.exists():
+            return None
+        return yaml.safe_load(file.open())
+
     def parse_dependencies(self, conf: DictConfig) -> DictConfig:
         new_conf = {}
         yaml_dir = Path(self.yaml_file).parent
-
         for k, v in conf.items():
-            # If value is a string, find yaml file to include
-            if isinstance(v, str):
-                included_file = yaml_dir / k / f'{v}.yaml'
-                if not included_file.exists():
-                    included_file = yaml_dir / f'{v}.yaml'
-                if not included_file.exists():
-                    continue
-                data = yaml.safe_load(included_file.open())
+            if (data := self._find_dependency(yaml_dir, k, v)) is not None:
                 new_conf[k] = data
-            # If value is a list, traverse the list and find yaml file to include
+
             if isinstance(v, ListConfig):
                 new_conf[k] = v
                 for idx, sub_v in enumerate(v):
-                    if isinstance(sub_v, str):
-                        included_file = yaml_dir / k / f'{sub_v}.yaml'
-                        if not included_file.exists():
-                            included_file = yaml_dir / f'{sub_v}.yaml'
-                        if not included_file.exists():
-                            continue
-                        data = yaml.safe_load(included_file.open())
+                    if (data := self._find_dependency(yaml_dir, k, sub_v)) is not None:
                         new_conf[k][idx] = data
         return new_conf
 
