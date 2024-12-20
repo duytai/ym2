@@ -14,11 +14,11 @@ class Sweeper:
 
     def sweep(self) -> List[Tuple]:
         if not self.overrides:
-            return [(self.conf, '')]
+            return [[self.conf, '']]
         ret = []
         for override in product(*self.overrides):
             copy_conf = deepcopy(self.conf)
             override_conf = OmegaConf.from_dotlist(override)
             merged_conf = OmegaConf.merge(copy_conf, override_conf)
-            ret.append((merged_conf, ','.join(override)))
+            ret.append([merged_conf, ';'.join(override)])
         return ret

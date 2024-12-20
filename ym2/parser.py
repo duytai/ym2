@@ -1,4 +1,4 @@
-from omegaconf import OmegaConf, DictConfig
+from omegaconf import OmegaConf, DictConfig, ListConfig
 from pathlib import Path
 from typing import List, Any, Union
 import yaml
@@ -42,7 +42,7 @@ class ConfigParser:
             description='A framework to configure complex AI/ML projects'
         )
         parser.add_argument('config_file', type=str, help='config file')
-        parser.add_argument('--version', action='version', version='%(prog)s 0.0.7')
+        parser.add_argument('--version', action='version', version='%(prog)s 0.0.9')
         args, cli_args = parser.parse_known_args()
 
         self.yaml_file = args.config_file
@@ -62,6 +62,34 @@ class ConfigParser:
         if return_dotlist:
             return dotlist
         return OmegaConf.from_dotlist(dotlist)
+
+    def parse_dependencies(self, conf: DictConfig) -> DictConfig:
+        new_conf = {}
+        yaml_dir = Path(self.yaml_file).parent
+
+        for k, v in conf.items():
+            # If value is a string, find yaml file to include
+            if isinstance(v, str):
+                included_file = yaml_dir / k / f'{v}.yaml'
+                if not included_file.exists():
+                    included_file = yaml_dir / f'{v}.yaml'
+                if not included_file.exists():
+                    continue
+                data = yaml.safe_load(included_file.open())
+                new_conf[k] = data
+            # If value is a list, traverse the list and find yaml file to include
+            if isinstance(v, ListConfig):
+                new_conf[k] = v
+                for idx, sub_v in enumerate(v):
+                    if isinstance(sub_v, str):
+                        included_file = yaml_dir / k / f'{sub_v}.yaml'
+                        if not included_file.exists():
+                            included_file = yaml_dir / f'{sub_v}.yaml'
+                        if not included_file.exists():
+                            continue
+                        data = yaml.safe_load(included_file.open())
+                        new_conf[k][idx] = data
+        return new_conf
 
     def parse(self) -> DictConfig:
         yaml_conf = self.parse_yaml()
