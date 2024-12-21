@@ -42,7 +42,7 @@ class ConfigParser:
             description='A framework to configure complex AI/ML projects'
         )
         parser.add_argument('config_file', type=str, help='config file')
-        parser.add_argument('--version', action='version', version='%(prog)s 0.0.9')
+        parser.add_argument('--version', action='version', version='%(prog)s 0.1.2')
         args, cli_args = parser.parse_known_args()
 
         self.yaml_file = args.config_file
@@ -86,7 +86,7 @@ class ConfigParser:
                 for idx, sub_v in enumerate(v):
                     if (data := self._find_dependency(yaml_dir, k, sub_v)) is not None:
                         new_conf[k][idx] = data
-        return new_conf
+        return OmegaConf.create(new_conf)
 
     def parse(self) -> DictConfig:
         yaml_conf = self.parse_yaml()

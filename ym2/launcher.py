@@ -1,5 +1,5 @@
 from typing import List, Tuple, Callable, Any, Dict
-from omegaconf import OmegaConf
+from omegaconf import OmegaConf, DictConfig
 from pathlib import Path
 from multiprocessing import Process
 from dataclasses import dataclass, asdict
@@ -50,7 +50,7 @@ class Worker:
                 running_dir=str(self.running_dir),
                 curr=self.curr,
                 total=self.total,
-                config=self.conf,
+                config=OmegaConf.to_object(self.conf),
                 override=self.override,
                 term=self.term,
                 status='running',
@@ -86,7 +86,7 @@ class Launcher:
         self.confs = confs
         self.term = term
 
-    def worker(self, conf: Dict, override: str, curr: int, total: int):
+    def worker(self, conf: DictConfig, override: str, curr: int, total: int):
         w = Worker(conf, override, curr, total, self.term)
         w.setup()
         w.run(self.cls)
@@ -97,7 +97,6 @@ class Launcher:
         print(f'[*] Launch {total} tasks locally.')
         for curr, (conf, override) in enumerate(self.confs):
             OmegaConf.resolve(conf)
-            conf = OmegaConf.to_object(conf)
             process = Process(
                 target=self.worker,
                 args=(conf, override, curr + 1, total)
