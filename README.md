@@ -42,6 +42,6 @@ obj = instantiate(hello_world)
 obj = instantiate(hello_world, x=1, y=2)
 ```
 
-## Feedback or Contribution
+## Feedback
 Create a new pull request
 
