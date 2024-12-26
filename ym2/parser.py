@@ -11,7 +11,7 @@ class OverrideParser:
 
     @staticmethod
     def is_overrided(value: Any) -> bool:
-        return isinstance(value, str) and ',' in value
+        return isinstance(value, str) and ',' in value and ':' not in value
 
     @staticmethod
     def is_nested(value: Any) -> bool:
@@ -42,7 +42,7 @@ class ConfigParser:
             description='A framework to configure complex AI/ML projects'
         )
         parser.add_argument('config_file', type=str, help='config file')
-        parser.add_argument('--version', action='version', version='%(prog)s 0.1.2')
+        parser.add_argument('--version', action='version', version='%(prog)s 0.1.5')
         args, cli_args = parser.parse_known_args()
 
         self.yaml_file = args.config_file
@@ -65,7 +65,7 @@ class ConfigParser:
 
     @staticmethod
     def _find_dependency(yaml_dir: Path, k: str, v: Any) -> Optional[Dict]:
-        if not isinstance(v, str):
+        if not isinstance(v, str) or '\n' in v:
             return None
         file = yaml_dir / k / f'{v}.yaml'
         if not file.exists():
